@@ -8,8 +8,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Sriracha&display=swap" rel="stylesheet"> 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
-    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> -->
-    <title>Hello, world!</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <title>To Do List</title>
+    <script src="jquery.js"></script>
+    <script src="jquery.validate.js"></script>
     <style>
         /* .container{
             display: flex;
@@ -46,7 +48,7 @@
                 </div>
                 <div class="mb-3">
                   <label for="date" class="form-label">Days To Complete</label>
-                  <input type="number" name="date" class="form-control" id="days" required="required">
+                  <input type="date" name="date" class="form-control" id="days" required="required">
                 </div>
                 <button type="submit" class="btn btn-primary" onclick="Add_to_list(document.todolist.task, document.todolist.date)">Submit</button>
                 <!-- onclick="Add_to_list()" -->
@@ -60,55 +62,77 @@
         <div class="row" id="list"></div> 
       </div>
   </body>
+
   <script>
-      function Add_to_list(task, date){
-          event.preventDefault();
-          // let task = document.getElementById('task');
-          // let date = document.getElementById('days');
-          let list = document.getElementById('list');
-          let days = date.value;
+    let today = new Date()
+    let tomorrow = new Date(today)
+    tomorrow.setDate(tomorrow.getDate() + 1)
 
-          let div = document.createElement("DIV");
-          if(task.value == ""){
-            alert("Please fill out the task field")
-          }else if(Number.isNaN(days) || days == ""){
-            alert('Please enter a number')
-          }else if(days < 1){
-            alert('Please select a value that is no less than 1.')
-          }else{
-            div.classList.add('col-md-auto');
-            
-            if(days < 3){
-                div.classList.add('alert', 'alert-danger');
-            }else if(days < 7){
-                div.classList.add('alert', 'alert-warning');
-            }else{
-                div.classList.add('alert', 'alert-dark');
-            }
-            div.classList.add('alert-dismissible', 'fade', 'show');
-            div.setAttribute("role", "alert");
-            div.innerText = task.value + '\n' + days + " day(s)"; 
+    let dd = tomorrow.getDate();
+    let mm = tomorrow.getMonth()+1; //January is 0 so need to add 1 to make it 1!
+    let yyyy = tomorrow.getFullYear();
+    if(dd<10){
+    dd='0'+dd
+    } 
+    if(mm<10){
+    mm='0'+mm
+    } 
 
-            div.style.margin = '10px';
+    tomorrow = yyyy+'-'+mm+'-'+dd;
+    document.getElementById("days").setAttribute("min", tomorrow);
 
-            let button = document.createElement("BUTTON");
-            
-            button.setAttribute("type", "button")
-            button.classList.add('btn-close');
-            button.setAttribute("data-bs-dismiss", "alert");
-            button.setAttribute("aria-label", "Close");
-            div.appendChild(button);
-          //   div.appendChild(document.createTextNode(task.value + days + 'day(s)')); 
-          
-          list.appendChild(div); 
-          
-          task.value=""
-          date.value=""
-          return false;
-          }
-        
-          
-             
-      }
+    $(function () {
+        $("form").validate();
+    });
+
+    $( "form" ).on( "submit", function(e) {
+
+    let dataString = $(this).serialize();
+    let date = document.getElementById('days');
+    
+    let days = date.value;
+    let chosenDate = days.split("-");
+    let chosenYear = chosenDate[0];
+    let chosenMonth = chosenDate[1] -1;
+    let chosenDay = chosenDate[2];
+
+    let today = new Date();
+    let futureDate = new Date(chosenYear, chosenMonth, chosenDay);
+
+    let daysbetween = futureDate - today;
+    let num_days = Math.floor((daysbetween / (60*60*24*1000)));
+
+    let div = document.createElement("DIV");
+    div.classList.add('col-md-auto');
+
+    if(num_days < 3){
+        div.classList.add('alert', 'alert-danger');
+    }else if(num_days < 7){
+        div.classList.add('alert', 'alert-warning');
+    }else{
+        div.classList.add('alert', 'alert-dark');
+    }
+    div.classList.add('alert-dismissible', 'fade', 'show');
+    div.setAttribute("role", "alert");
+    div.innerText = task.value + '\n' + num_days + " day(s)"; 
+
+    div.style.margin = '10px';
+
+    let button = document.createElement("BUTTON");
+    
+    button.setAttribute("type", "button")
+    button.classList.add('btn-close');
+    button.setAttribute("data-bs-dismiss", "alert");
+    button.setAttribute("aria-label", "Close");
+    div.appendChild(button);
+    
+    list.appendChild(div); 
+    
+    task.value=""
+    date.value=""
+    
+    e.preventDefault();
+});
+    
   </script>
 </html>
